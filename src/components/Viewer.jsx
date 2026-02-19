@@ -981,8 +981,8 @@ function Viewer({ onSceneReady }) {
           {(placingTattoo || movingTattoo) && (
             <div className="placement-hint">
               {placingTattoo
-                ? `Placing ${placingTattoo.name}: move pointer on body, click to place`
-                : `Moving ${movingTattoo.name}: move pointer on body, click to place`}
+                ? `Placing ${placingTattoo.name}: click on body to place`
+                : `Moving ${movingTattoo.name}: click on body to place or press "move" to cancel`}
             </div>
           )}
           <div>Pinch — zoom</div>
