@@ -177,7 +177,7 @@ function App() {
         setLoadedCount(i + 1);
         addLog(`Loaded ${asset.label}`);
       }
-      addLog("All assets loaded. Rendering first 3D frame...");
+      addLog("All assets loaded. Rendering first frame...");
       setAwaitingFirstFrame(true);
       setViewerMounted(true);
     } catch (error) {
@@ -189,7 +189,7 @@ function App() {
 
   const handleSceneReady = () => {
     if (!awaitingFirstFrame || entered) return;
-    addLog("First 3D frame ready. Entering app...");
+    addLog("First frame ready. Entering app...");
     setLoading(false);
     setAwaitingFirstFrame(false);
     setPanelClosed(true);
