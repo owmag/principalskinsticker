@@ -574,7 +574,7 @@ function Scene({
   );
 }
 
-function Viewer({ onSceneReady }) {
+function Viewer({ onSceneReady, onStatus, totalCount }) {
   const [selectedModel, setSelectedModel] = useState(MODELS[0]);
   const [selectedBackground, setSelectedBackground] = useState(
     () => BACKGROUNDS.find((b) => b.id === "sky4k") || BACKGROUNDS[0],
@@ -595,6 +595,14 @@ function Viewer({ onSceneReady }) {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryCapture, setGalleryCapture] = useState(null);
   const canvasWrapRef = useRef(null);
+
+  const hasReportedInit = useRef(false);
+  useEffect(() => {
+    if (onStatus && totalCount != null && !hasReportedInit.current) {
+      hasReportedInit.current = true;
+      onStatus("Initializing canvas...", totalCount - 1);
+    }
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e) => {

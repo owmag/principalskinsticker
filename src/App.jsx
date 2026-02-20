@@ -163,7 +163,10 @@ function App() {
         })),
       ];
 
-      setTotalCount(assets.length);
+      const phase2Steps = 3;
+      const phase3Steps = 3;
+      const totalSteps = assets.length + phase2Steps + phase3Steps;
+      setTotalCount(totalSteps);
 
       for (let i = 0; i < assets.length; i += 1) {
         const asset = assets[i];
@@ -173,7 +176,7 @@ function App() {
         addLog(`Loaded ${asset.label}`);
       }
 
-      addLog("Phase 1/2 complete. First frame ready.");
+      addLog("Phase 1/2 complete.");
 
       addLog("Phase 2/2: Warm R3F cache");
 
@@ -181,19 +184,24 @@ function App() {
         [import("@react-three/drei"), import("@react-three/fiber")],
       );
 
+      const phase2Start = assets.length;
+
       addLog("Warming environments...");
+      setLoadedCount(phase2Start + 1);
       BACKGROUNDS.forEach((b) => {
         if (b.path) useEnvironment.preload({ files: `/bgs/${b.path}` });
       });
       await Promise.resolve();
 
       addLog("Warming body models...");
+      setLoadedCount(phase2Start + 2);
       MODELS.forEach((m) => {
         if (m.path) useLoader.preload(OBJLoader, `/models/${m.path}`);
       });
       await Promise.resolve();
 
       addLog("Warming tattoo textures...");
+      setLoadedCount(phase2Start + 3);
       TATTOOS.forEach((t) => {
         if (t.path) useTexture.preload(`/tattoos/${t.path}`);
       });
@@ -201,6 +209,11 @@ function App() {
 
       addLog("Phase 2/2 complete. Cache warm.");
       addLog("Entering environment...");
+
+      const phase3Start = assets.length + phase2Steps;
+
+      addLog("Loading 3D viewer...");
+      setLoadedCount(phase3Start + 1);
 
       setAwaitingFirstFrame(true);
       setViewerMounted(true);
@@ -213,6 +226,8 @@ function App() {
 
   const handleSceneReady = () => {
     if (!awaitingFirstFrame || entered) return;
+    addLog("Rendering first frame...");
+    setLoadedCount(totalCount);
     addLog("First frame ready. Entering app...");
     setLoading(false);
     setAwaitingFirstFrame(false);
@@ -237,7 +252,14 @@ function App() {
     <>
       {(viewerMounted || entered) && (
         <Suspense fallback={null}>
-          <Viewer onSceneReady={handleSceneReady} />
+          <Viewer
+            onSceneReady={handleSceneReady}
+            onStatus={(msg, step) => {
+              addLog(msg);
+              if (step != null) setLoadedCount(step);
+            }}
+            totalCount={totalCount}
+          />
         </Suspense>
       )}
       {showEnterScreen && (
