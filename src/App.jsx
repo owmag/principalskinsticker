@@ -1,4 +1,11 @@
-import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import "./App.css";
 import { MODELS } from "./models";
 import { TATTOOS } from "./tattoos";
@@ -128,48 +135,36 @@ function App() {
     setLogs([]);
     setLoadedCount(0);
 
-    const [three, { OBJLoader }, { RGBELoader }, { useEnvironment, useTexture }, { useLoader }] =
-      await Promise.all([
+    try {
+      addLog("Phase 1/2: Prime core assets");
+
+      const [three, { OBJLoader }, { RGBELoader }] = await Promise.all([
         import("three"),
         import("three/examples/jsm/loaders/OBJLoader.js"),
         import("three/examples/jsm/loaders/RGBELoader.js"),
-        import("@react-three/drei"),
-        import("@react-three/fiber"),
       ]);
 
-    BACKGROUNDS.forEach((b) => {
-      if (b.path) useEnvironment.preload({ files: `/bgs/${b.path}` });
-    });
-    MODELS.forEach((m) => {
-      if (m.path) useLoader.preload(OBJLoader, `/models/${m.path}`);
-    });
-    TATTOOS.forEach((t) => {
-      if (t.path) useTexture.preload(`/tattoos/${t.path}`);
-    });
+      const textureLoader = new three.TextureLoader();
+      const objLoader = new OBJLoader();
+      const rgbeLoader = new RGBELoader();
 
-    const textureLoader = new three.TextureLoader();
-    const objLoader = new OBJLoader();
-    const rgbeLoader = new RGBELoader();
+      const assets = [
+        ...MODELS.filter((m) => m.path).map((m) => ({
+          label: `model /models/${m.path}`,
+          load: () => preloadWithLoader(objLoader, `/models/${m.path}`),
+        })),
+        ...TATTOOS.filter((t) => t.path).map((t) => ({
+          label: `tattoo /tattoos/${t.path}`,
+          load: () => preloadWithLoader(textureLoader, `/tattoos/${t.path}`),
+        })),
+        ...BACKGROUNDS.filter((b) => b.path).map((b) => ({
+          label: `background /bgs/${b.path}`,
+          load: () => preloadWithLoader(rgbeLoader, `/bgs/${b.path}`),
+        })),
+      ];
 
-    const assets = [
-      ...MODELS.filter((m) => m.path).map((m) => ({
-        label: `model /models/${m.path}`,
-        load: () => preloadWithLoader(objLoader, `/models/${m.path}`),
-      })),
-      ...TATTOOS.filter((t) => t.path).map((t) => ({
-        label: `tattoo /tattoos/${t.path}`,
-        load: () => preloadWithLoader(textureLoader, `/tattoos/${t.path}`),
-      })),
-      ...BACKGROUNDS.filter((b) => b.path).map((b) => ({
-        label: `background /bgs/${b.path}`,
-        load: () => preloadWithLoader(rgbeLoader, `/bgs/${b.path}`),
-      })),
-    ];
+      setTotalCount(assets.length);
 
-    setTotalCount(assets.length);
-    addLog(`Queue prepared (${assets.length} assets)`);
-
-    try {
       for (let i = 0; i < assets.length; i += 1) {
         const asset = assets[i];
         addLog(`Downloading ${asset.label}...`);
@@ -177,7 +172,36 @@ function App() {
         setLoadedCount(i + 1);
         addLog(`Loaded ${asset.label}`);
       }
-      addLog("All assets loaded. Rendering first frame...");
+
+      addLog("Phase 1/2 complete. First frame ready.");
+
+      addLog("Phase 2/2: Warm R3F cache");
+
+      const [{ useEnvironment, useTexture }, { useLoader }] = await Promise.all(
+        [import("@react-three/drei"), import("@react-three/fiber")],
+      );
+
+      addLog("Warming environments...");
+      BACKGROUNDS.forEach((b) => {
+        if (b.path) useEnvironment.preload({ files: `/bgs/${b.path}` });
+      });
+      await Promise.resolve();
+
+      addLog("Warming body models...");
+      MODELS.forEach((m) => {
+        if (m.path) useLoader.preload(OBJLoader, `/models/${m.path}`);
+      });
+      await Promise.resolve();
+
+      addLog("Warming tattoo textures...");
+      TATTOOS.forEach((t) => {
+        if (t.path) useTexture.preload(`/tattoos/${t.path}`);
+      });
+      await Promise.resolve();
+
+      addLog("Phase 2/2 complete. Cache warm.");
+      addLog("Entering environment...");
+
       setAwaitingFirstFrame(true);
       setViewerMounted(true);
     } catch (error) {
@@ -193,18 +217,15 @@ function App() {
     setLoading(false);
     setAwaitingFirstFrame(false);
     setPanelClosed(true);
-    const fadeDelayMs = 160;
+    const fadeDelayMs = 400;
     const fadeDurationMs = 950;
     const startFadeTimer = window.setTimeout(() => {
       setBlackDropped(true);
     }, fadeDelayMs);
-    const snapOffTimer = window.setTimeout(
-      () => {
-        setEntered(true);
-        setShowEnterScreen(false);
-      },
-      fadeDelayMs + fadeDurationMs,
-    );
+    const snapOffTimer = window.setTimeout(() => {
+      setEntered(true);
+      setShowEnterScreen(false);
+    }, fadeDelayMs + fadeDurationMs);
     transitionTimersRef.current.push(startFadeTimer, snapOffTimer);
   };
 
