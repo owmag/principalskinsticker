@@ -177,10 +177,9 @@ function App() {
 
       addLog("Phase 2/2: Warm R3F cache");
 
-      const [{ useEnvironment, useTexture }, { useLoader }] = await Promise.all([
-        import("@react-three/drei"),
-        import("@react-three/fiber"),
-      ]);
+      const [{ useEnvironment, useTexture }, { useLoader }] = await Promise.all(
+        [import("@react-three/drei"), import("@react-three/fiber")],
+      );
 
       addLog("Warming environments...");
       BACKGROUNDS.forEach((b) => {
