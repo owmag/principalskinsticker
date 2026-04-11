@@ -458,7 +458,7 @@ function TattooDecal({
   ].includes(path)
     ? DECAL_WIDTH_FIX
     : 1;
-  const heightFix = ["001.png", "009.png", "014.png"].includes(path)
+  const heightFix = ["001.png", "009.png", "014.png", "027.png"].includes(path)
     ? DECAL_HEIGHT_FIX
     : 1;
   const scaleVec = Array.isArray(scale)

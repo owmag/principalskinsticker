@@ -26,4 +26,5 @@ export const TATTOOS = [
   { id: "design-024", name: "Design 24", path: "024.png" },
   { id: "design-025", name: "Design 25", path: "025.png" },
   { id: "design-026", name: "Design 26", path: "026.png" },
+  { id: "design-027", name: "Design 27", path: "027.png" },
 ];
