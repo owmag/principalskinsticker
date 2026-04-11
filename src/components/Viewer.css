@@ -492,8 +492,7 @@ button.collapsible-header {
 
 .tattoo-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-auto-rows: minmax(min(90px, 22vw), max-content);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: clamp(4px, 1.2vw, 6px);
   max-height: clamp(140px, 35vh, 320px);
   overflow-x: hidden;
@@ -502,7 +501,7 @@ button.collapsible-header {
 }
 
 .tattoo-grid-item {
-  min-height: min(90px, 22vw);
+  width: 100%;
   aspect-ratio: 1;
   background: #3c3c3c;
   border: 1px solid #000;
