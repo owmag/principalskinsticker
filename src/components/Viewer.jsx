@@ -1,4 +1,11 @@
-import { useState, useRef, Suspense, useMemo, useEffect } from "react";
+import {
+  useState,
+  useRef,
+  Suspense,
+  useMemo,
+  useEffect,
+  useCallback,
+} from "react";
 import { Canvas, useLoader, useThree } from "@react-three/fiber";
 import {
   OrbitControls,
@@ -7,10 +14,11 @@ import {
   Environment,
 } from "@react-three/drei";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
+import { RGBELoader } from "three-stdlib";
 import * as THREE from "three";
 import { MODELS } from "../models";
 import { TATTOOS } from "../tattoos";
-import { BACKGROUNDS } from "../backgrounds";
+import { BACKGROUNDS, getDefaultBackground } from "../backgrounds";
 import { HexColorPicker } from "react-colorful";
 import "./Viewer.css";
 
@@ -97,7 +105,14 @@ function BodyTypeSelector({ value, options, onChange, open, onOpenChange }) {
   );
 }
 
-function BackgroundSelector({ value, options, onChange, open, onOpenChange }) {
+function BackgroundSelector({
+  value,
+  options,
+  onChange,
+  open,
+  onOpenChange,
+  loading = false,
+}) {
   const [internalOpen, setInternalOpen] = useState(false);
   const isControlled = open !== undefined;
   const isOpen = isControlled ? open : internalOpen;
@@ -111,7 +126,14 @@ function BackgroundSelector({ value, options, onChange, open, onOpenChange }) {
         className="collapsible-header"
         onClick={() => setOpen(!isOpen)}
       >
-        <span>{selected?.name ?? "Background"}</span>
+        <span className="collapsible-header-title-row">
+          <span className="collapsible-header-title-text">
+            {selected?.name ?? "Background"}
+          </span>
+          <span className="bg-hdr-spinner-slot" aria-hidden>
+            {loading ? <span className="bg-hdr-spinner" /> : null}
+          </span>
+        </span>
         <span
           className={`collapsible-arrow collapsible-arrow--${isOpen ? "down" : "right"}`}
           aria-hidden
@@ -515,6 +537,15 @@ function SceneReadySignal({ onReady }) {
   return null;
 }
 
+/** Loads HDR into R3F cache (same loader as drei Environment) without touching the scene. */
+function HdrPreload({ path, onLoaded }) {
+  useLoader(RGBELoader, path);
+  useEffect(() => {
+    onLoaded(path);
+  }, [path, onLoaded]);
+  return null;
+}
+
 function Scene({
   modelUrl,
   tattoos,
@@ -576,9 +607,23 @@ function Scene({
 
 function Viewer({ onSceneReady, onStatus, totalCount }) {
   const [selectedModel, setSelectedModel] = useState(MODELS[0]);
-  const [selectedBackground, setSelectedBackground] = useState(
-    () => BACKGROUNDS.find((b) => b.id === "sky4k") || BACKGROUNDS[0],
-  );
+  const [selectedBackground, setSelectedBackground] =
+    useState(getDefaultBackground);
+  const [committedBackground, setCommittedBackground] =
+    useState(getDefaultBackground);
+  const selectedBackgroundRef = useRef(selectedBackground);
+  selectedBackgroundRef.current = selectedBackground;
+
+  const hdrSwitchPending =
+    selectedBackground.id !== committedBackground.id &&
+    !!selectedBackground.path;
+
+  const finalizeHdrSwitch = useCallback((loadedPath) => {
+    const sel = selectedBackgroundRef.current;
+    if (!sel.path || loadedPath !== `/bgs/${sel.path}`) return;
+    setCommittedBackground(sel);
+  }, []);
+
   const [skinColor, setSkinColor] = useState("#a16a5f");
   const [activeTattoos, setActiveTattoos] = useState([]);
   const [placingTattoo, setPlacingTattoo] = useState(null);
@@ -752,6 +797,7 @@ function Viewer({ onSceneReady, onStatus, totalCount }) {
             <BackgroundSelector
               value={selectedBackground.id}
               options={BACKGROUNDS}
+              loading={hdrSwitchPending}
               onChange={(b) => setSelectedBackground(b)}
               open={backgroundOpen}
               onOpenChange={setBackgroundOpen}
@@ -927,7 +973,7 @@ function Viewer({ onSceneReady, onStatus, totalCount }) {
           <Scene
             modelUrl={modelUrl}
             tattoos={activeTattoos}
-            backgroundPath={`/bgs/${selectedBackground.path}`}
+            backgroundPath={`/bgs/${committedBackground.path}`}
             skinColor={skinColor}
             modelRotation={selectedModel.rotation || [0, 0, 0]}
             placingTattoo={placingTattoo}
@@ -939,6 +985,15 @@ function Viewer({ onSceneReady, onStatus, totalCount }) {
             cameraResetTrigger={cameraResetTrigger}
             onSceneReady={onSceneReady}
           />
+          {hdrSwitchPending && (
+            <Suspense fallback={null}>
+              <HdrPreload
+                key={selectedBackground.id}
+                path={`/bgs/${selectedBackground.path}`}
+                onLoaded={finalizeHdrSwitch}
+              />
+            </Suspense>
+          )}
         </Canvas>
         <div className="bottom-strip">
           <div className="bottom-buttons-wrap">

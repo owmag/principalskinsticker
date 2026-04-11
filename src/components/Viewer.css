@@ -173,6 +173,43 @@ button.collapsible-header {
   text-align: left;
 }
 
+.collapsible-header-title-row {
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.collapsible-header-title-text {
+  min-width: 0;
+}
+
+.bg-hdr-spinner-slot {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bg-hdr-spinner {
+  width: 10px;
+  height: 10px;
+  border: 2px solid rgba(192, 192, 192, 0.35);
+  border-top-color: #b7ff00;
+  border-radius: 50%;
+  box-sizing: border-box;
+  animation: bg-hdr-spin 0.65s linear infinite;
+}
+
+@keyframes bg-hdr-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .collapsible-header:hover {
   background: #404040;
 }

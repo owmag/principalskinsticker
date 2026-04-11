@@ -9,7 +9,7 @@ import {
 import "./App.css";
 import { MODELS } from "./models";
 import { TATTOOS } from "./tattoos";
-import { BACKGROUNDS } from "./backgrounds";
+import { getDefaultBackground } from "./backgrounds";
 
 const Viewer = lazy(() => import("./components/Viewer"));
 
@@ -147,6 +147,7 @@ function App() {
       const textureLoader = new three.TextureLoader();
       const objLoader = new OBJLoader();
       const rgbeLoader = new RGBELoader();
+      const defaultBackground = getDefaultBackground();
 
       const assets = [
         ...MODELS.filter((m) => m.path).map((m) => ({
@@ -157,10 +158,18 @@ function App() {
           label: `tattoo /tattoos/${t.path}`,
           load: () => preloadWithLoader(textureLoader, `/tattoos/${t.path}`),
         })),
-        ...BACKGROUNDS.filter((b) => b.path).map((b) => ({
-          label: `background /bgs/${b.path}`,
-          load: () => preloadWithLoader(rgbeLoader, `/bgs/${b.path}`),
-        })),
+        ...(defaultBackground.path
+          ? [
+              {
+                label: `background /bgs/${defaultBackground.path}`,
+                load: () =>
+                  preloadWithLoader(
+                    rgbeLoader,
+                    `/bgs/${defaultBackground.path}`,
+                  ),
+              },
+            ]
+          : []),
       ];
 
       const phase2Steps = 3;
@@ -186,11 +195,11 @@ function App() {
 
       const phase2Start = assets.length;
 
-      addLog("Warming environments...");
+      addLog("Warming default environment...");
       setLoadedCount(phase2Start + 1);
-      BACKGROUNDS.forEach((b) => {
-        if (b.path) useEnvironment.preload({ files: `/bgs/${b.path}` });
-      });
+      if (defaultBackground.path) {
+        useEnvironment.preload({ files: `/bgs/${defaultBackground.path}` });
+      }
       await Promise.resolve();
 
       addLog("Warming body models...");
