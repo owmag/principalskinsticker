@@ -528,9 +528,11 @@ button.collapsible-header {
 }
 
 .tattoo-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(4px, 1.2vw, 6px);
+  --tattoo-grid-gap: clamp(4px, 1.2vw, 6px);
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: var(--tattoo-grid-gap);
   max-height: clamp(140px, 35vh, 320px);
   overflow-x: hidden;
   overflow-y: auto;
@@ -538,7 +540,8 @@ button.collapsible-header {
 }
 
 .tattoo-grid-item {
-  width: 100%;
+  flex: 0 0 calc((100% - var(--tattoo-grid-gap)) / 2);
+  width: calc((100% - var(--tattoo-grid-gap)) / 2);
   aspect-ratio: 1;
   background: #3c3c3c;
   border: 1px solid #000;
@@ -548,6 +551,7 @@ button.collapsible-header {
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
   min-width: 0; /* Safari flex bug */
 }
 
@@ -687,15 +691,6 @@ button.collapsible-header {
 }
 
 @media (max-width: 768px) {
-  .tattoo-grid {
-    grid-auto-rows: minmax(min(90px, 22vw), max-content);
-  }
-
-  .tattoo-grid-item {
-    min-height: min(90px, 22vw);
-    aspect-ratio: auto;
-  }
-
   .control-group input[type="range"]::-webkit-slider-thumb {
     width: 18px;
     height: 18px;
@@ -710,6 +705,15 @@ button.collapsible-header {
     border: 1px solid #fff;
     border-bottom-color: #404040;
     border-right-color: #404040;
+  }
+}
+
+@media (max-width: 420px) {
+  .tattoo-grid-item {
+    flex-basis: 100%;
+    width: 100%;
+    aspect-ratio: auto;
+    min-height: min(120px, 42vw);
   }
 }
 
