@@ -687,6 +687,15 @@ button.collapsible-header {
 }
 
 @media (max-width: 768px) {
+  .tattoo-grid {
+    grid-auto-rows: minmax(min(90px, 22vw), max-content);
+  }
+
+  .tattoo-grid-item {
+    min-height: min(90px, 22vw);
+    aspect-ratio: auto;
+  }
+
   .control-group input[type="range"]::-webkit-slider-thumb {
     width: 18px;
     height: 18px;
