@@ -708,15 +708,6 @@ button.collapsible-header {
   }
 }
 
-@media (max-width: 420px) {
-  .tattoo-grid-item {
-    flex-basis: 100%;
-    width: 100%;
-    aspect-ratio: auto;
-    min-height: min(120px, 42vw);
-  }
-}
-
 .control-group .value {
   font-size: 10px;
   color: #808080;
