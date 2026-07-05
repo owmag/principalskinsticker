@@ -1012,7 +1012,7 @@ function Viewer({ onSceneReady, onStatus, totalCount }) {
               Capture
             </button>
             <a
-              href="https://www.instagram.com/principalskinsticker/"
+              href="https://www.instagram.com/tattooerguy/"
               target="_blank"
               rel="noopener noreferrer"
               className="bottom-btn"

@@ -294,7 +294,7 @@ function App() {
                   lengthAdjust="spacingAndGlyphs"
                   fill="#222"
                 >
-                  PRINCIPAL SKIN STICKER
+                  TATTOOER GUY
                 </text>
               </g>
             </svg>
@@ -320,7 +320,7 @@ function App() {
                     lengthAdjust="spacingAndGlyphs"
                     fill="#b7ff00"
                   >
-                    PRINCIPAL SKIN STICKER
+                    TATTOOER GUY
                   </text>
                 </g>
               </svg>
@@ -342,7 +342,7 @@ function App() {
               SKINSTICKER.XYZ
             </div>
             <div className="enter-screen-text">
-              Principal Skin Sticker, Tattooer, based on planet Earth. This
+              Tattooer Guy, based on planet Earth. This
               website is a tool for your imagination, select flash designs
               available for character creator /real life. dm on ig to book flash
               or custom, send me ur captures etc
